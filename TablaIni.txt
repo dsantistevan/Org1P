@@ -1,4 +1,4 @@
-﻿Equipo,Puntos,PJ,PG,PE,PP,GF,GC,GD
+Equipo,Puntos,PJ,PG,PE,PP,GF,GC,GD
 Aucas,8,4,2,2,0,9,5,4
 Barcelona,10,4,3,1,0,7,2,5
 D. Cuenca,7,4,2,1,1,3,6,-3
