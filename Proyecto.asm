@@ -2,6 +2,7 @@
 
 .data
 archivo: .asciiz "TablaIni.txt"
+nombreEquipo: .space 20
 header: .space 35
 buffer: .space 1
 linea: .space 40
@@ -98,8 +99,16 @@ salir:
 # cuyo valor es 10, para que puedas comparar el valor del byte como entero, debes avanzar en i y reiniciar j.
 leerEquipos:
 	li $v0, 14	#Leer archivo
+	la $a3,nombre	#se van concatenando los char
 	move $a0, $s6	#Nombre de archivo
 	la $a1, buffer	#Almacena en el buffer
+	la $a2,1
+	syscall
+	#instrucciones que concatena char
+	lb      $v0,0($a1)   
+	sb      $v0,0($a3)                           
+    	addi    $a3,$a3,1          
+	
 	beq $a1, 10, saltoL
 	
 	li $v0, 4
