@@ -2,12 +2,14 @@
 
 .data
 archivo: .asciiz "TablaIni.txt"
-nombreEquipo: .space 20
+nombreEquipo: .space 256
+numbers: .space 512
 header: .space 36
 buffer: .space 1
-linea: .space 40
+#linea: .space 40
 coma: .ascii ","
 ingLoc: .asciiz "Ingrese el equipo local: "
+nombreArchivo: .asciiz "TablaIni"
 ingVis: .asciiz "Ingrese el equipo visitante: "
 ingGLoc: .asciiz "Ingrese los goles del equipo local: "
 ingGVis: .asciiz "Ingrese los goles del equipo visitante: "
@@ -98,27 +100,75 @@ salir:
 # en la direccion matriz[i][j], siendo j la cantidad de comas antes de esto (o el indice de la info). Cuando encuentres un '\n',
 # cuyo valor es 10, para que puedas comparar el valor del byte como entero, debes avanzar en i y reiniciar j.
 leerEquipos:
+	addi $t0, $zero, 44 #coma
+	addi $t1, $zero, 10 #salto de linea
+	addi $t2, $zero, 0 #ofsetnums
+	addi $t3, $zero, 0 #ofsetchars
+	addi $t6, $zero, 0 #numerolineas
+
+	la $s6, nombreArchivo
 	li $v0, 14	#Leer archivo
 	move $a0, $s6	#Nombre de archivo
 	
 	la $a1, header #lectura header
 	la $a2,36	
 	syscall
-	
-	la $a3,nombre	#se van concatenando los char
+fornombre:	
+	la $a3,nombreEquipo	#carga direccion nombreEquipo
+	add $a3, $a3, $t3	#suma ofset
+forchar:
 	la $a1, buffer	#Almacena en el buffer
 	la $a2,36	
 	syscall
-
-	#instrucciones que concatena char
+	#instrucciones que concatena char 
+	beq $a1, $t0, finishchar 
 	lb      $v0,0($a1)   
 	sb      $v0,0($a3)                           
-    	addi    $a3,$a3,1          
+    	addi    $a3,$a3,1 
+    	j forchar
+    	
+finishchar:
+	addi $t3, $t3, 16	#suma ofset chars
+Runagain:   	
+	la $a3,numbers		#cargardireccion numbers
+    	addi $t4, $zero, 0	#variable que va acumulando el int
+    	add $a3, $a3, $t2 	#suma ofset a la direccion
+for:
+	la $a1, buffer	#Almacena en el buffer
+	la $a2,36	
+	syscall
 	
-	beq $a1, 10, saltoL
-	
-	li $v0, 4
-	la $a0, linea
+	#sentencias, com y salto de linea
+	beq $a1, $t0, exit 
+	beq $a1, $t1, finlinea 
+	# multiplicacion por 10 variable que iba acumulando el int
+	sll $t4, $t4, 4
+	sll $t5, $t4, 2
+	add $t4, $t5, $t4
+	lb  $v0,0($a1)  
+	#obtencion unidad
+	addi $v0, $v0, -48   
+	#suma unidad a variable
+	add $t4, $t4, $v0                       
+    	j for        
+exit:
+	#escritura int construido
+	sw $t4,0($a3)
+	#suma de ofset en la variable que los va almacenando
+	add $t2, $t2, 4
+	j Runagain
+finlinea:
+	#escritura int construido
+	sw $t4,0($a3)
+	#suma de ofset en la variable que los va almacenando
+	add $t2, $t2, 4
+	#sentencia chequea si se han leido todas las lineas
+	addi $t7, $zero, 16
+	addi $t6,$t6,1
+	bne $t6, $t7, fornombre
+	#cierre archivo		
+	li   $s6, 16       # system call for close file
+	move $s6, $a0      # file descriptor to close
 	syscall 
 	jr $ra
 	
