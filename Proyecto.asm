@@ -106,9 +106,9 @@ leerEquipos:
 	addi $t3, $zero, 0 #ofsetchars
 	addi $t6, $zero, 0 #numerolineas
 
-	la $s6, nombreArchivo
+	la $a0, nombreArchivo
 	li $v0, 14	#Leer archivo
-	move $a0, $s6	#Nombre de archivo
+	move $s6, $v0	#Nombre de archivo
 	
 	la $a1, header #lectura header
 	la $a2,36	
@@ -167,8 +167,8 @@ finlinea:
 	addi $t6,$t6,1
 	bne $t6, $t7, fornombre
 	#cierre archivo		
-	li   $s6, 16       # system call for close file
-	move $s6, $a0      # file descriptor to close
+	li   $v0, 16       # system call for close file
+	move $a0, $s6      # file descriptor to close
 	syscall 
 	jr $ra
 	
