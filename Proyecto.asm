@@ -140,7 +140,7 @@ for:
 	syscall
 	lb 	$t9,0($a1)
 	#sentencias, com y salto de linea
-	beq 	$t9, $t0, exit 
+	beq 	$t9, $t0, exit0
 	beq	$t9, 13, for
 	beq	$t9, 45, menos
 	j seguirAqui
@@ -160,7 +160,7 @@ seguirAqui:
 	#suma unidad a variable
 	add 	$t4, $t9, $t4                       
     	j 	for        
-exit:
+exit0:
 	#escritura int construido
 	sw 	$t4, ($a3)
 	#suma de ofset en la variable que los va almacenando
@@ -204,7 +204,7 @@ forprimermayor:
 	lw 	$t6, 0($t3) 
 	slt 	$t4, $t0, $t5
 	bne 	$t4,$zero,mayor
-	bne 	$t0, $t5, exit1
+	bne 	$t0, $t5, exit
 	slt 	$t4, $t1,$t6
 	bne 	$t4,$zero,mayor	
 mayor:
@@ -241,7 +241,7 @@ forarr:
 check:
 	slt 	$t4, $t8, $t0
 	bne 	$t4, $zero, cambio
-	bne 	$t8, $t0, exit2
+	bne 	$t8, $t0, exit
 	slt 	$t4, $t9, $t1
 	bne 	$t4, $zero, cambio
 	j 	exit	
