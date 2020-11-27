@@ -200,15 +200,15 @@ forprimermayor:
 	lw 	$t6, 0($t3) 
 	slt 	$t4, $t0, $t5
 	bne 	$t4,$zero,mayor
-	bne 	$t0, $t5, exit
+	bne 	$t0, $t5, exit1
 	slt 	$t4, $t1,$t6
 	bne 	$t4,$zero,mayor	
 mayor:
 	add 	$t0,$t5,$zero
 	add 	$t1, $t6, $zero
 	add 	$v0, $t2, $zero
-	j 	exit
-exit:   
+	j 	exit1
+exit1:   
 	addi 	$t7, $zero, 16
 	addi 	$a1,$a1, 32
 	addi 	$t3, $a1, 28
