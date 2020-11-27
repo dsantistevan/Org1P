@@ -6,9 +6,12 @@ posiciones: 	.space 64
 nombreEquipo: 	.space 256
 header: 	.space 36
 buffer: 	.space 1
+input:		.space 16
 archivo: 	.asciiz "TablaIni.txt"
 #linea: .space 40
+espacioT:	.asciiz " "
 coma: 		.ascii ","
+saltoLinea:	.asciiz "\n"
 ingLoc: 	.asciiz "Ingrese el equipo local: "
 nombreArchivo: 	.asciiz "TablaIni"
 ingVis: 	.asciiz "Ingrese el equipo visitante: "
@@ -20,7 +23,7 @@ adios: 		.asciiz "\nAdios, gracias por usar este programa, cuídate\n"
 #Salto de linea: '\n' es 10 en ASCII
 .text
 
-la $t0, numbers
+la $s7, posiciones
 
 li 	$v0, 4
 la 	$a0, bienvenidaTexto
@@ -35,7 +38,7 @@ move 	$s6, $v0	#Guarda descriptor del archivo
 
 
 jal 	leerEquipos	
-#jal	Sort
+jal	Sort
 
 
 
@@ -53,16 +56,14 @@ menu:
 	j 	menu
 
 	tabla:
-		li 	$v0, 4
-		la 	$a0, ingLoc
-		syscall
-		j 	menu
+		li	$a0, 16
+		jal	printTabla
+		j	menu
 
 	mejores:
-		li	$v0, 4
-		la 	$a0, ingVis
-		syscall
-		j 	menu
+		li	$a0, 3
+		jal	printTabla
+		j	menu
 	
 	
 	partido:
@@ -265,5 +266,49 @@ exitgrande:
 	bne 	$a2, $t7, forgrande
 	jr 	$ra
 	
+# $a0 guarda la cantidad de equipos
+printTabla:
+	move	$t0, $a0 	#$t0 es la cantidad de equipos a imprimir
+	la	$s1, posiciones
+	la	$s2, nombreEquipo
+	la	$s3, numbers
 	
+### Espacio
+	la	$a0, header
+	li	$v0, 4
+	syscall
+### Fin del Espacio
+
+	addi	$t4, $zero, 0
+recorrerPos:
+	sll	$t5, $t4, 2
+	add	$t6, $s1, $t5
+	lw	$t5, 0($t6)
+	sll	$t5, $t5, 4
+	add	$t6, $t5, $s2
+	move	$a0, $t6	#Nombre
+	li	$v0, 4
+	syscall
+	sll	$t5, $t5, 1
+	add	$t7, $t5, $s3	#Matriz indexada del equipo
+	addi	$t8, $zero, 0
+forEquipo:
+	la	$a0, espacioT
+	li	$v0, 4
+	syscall
+	sll	$t9, $t8, 2
+	add	$t9, $t9, $t7
+	lw	$a0, 0($t9)
+	li	$v0, 1
+	syscall
+	addi	$t8, $t8, 1
+	bne	$t8, 8, forEquipo
+#Afuera del for	Equipo
+	la	$a0, saltoLinea
+	li	$v0, 4
+	syscall
+	addi	$t4, $t4, 1
+	bne	$t4, $t0, recorrerPos
+#Afuera de todo
+	jr	$ra
 	
