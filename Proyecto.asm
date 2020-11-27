@@ -2,6 +2,7 @@
 
 .data
 archivo: .asciiz "TablaIni.txt"
+posiciones: .space 64
 nombreEquipo: .space 256
 numbers: .space 512
 header: .space 36
@@ -173,3 +174,90 @@ finlinea:
 	jr $ra
 	
 saltoL:
+
+
+Sort:
+	la $a0, posiciones
+	la $a1, numbers
+	addi $t3, $a1, 28
+	lw $t0, 0($a1) 
+	lw $t1, 0($t3) 
+	addi $a1,$a1, 32
+	addi $t2, $zero, 0 #numerpo iteraciones
+	addi $a1,$a1,4
+	addi $v0, $zero, 0
+	addi $t3, $a1, 28
+	
+forprimermayor:	
+	addi $t2 $t2, 1
+	lw $t5, 0($a1) 
+	lw $t6, 0($t3) 
+	slt $t4, $t0, $t5
+	bne $t4,$zero,mayor
+	bne $t0, $t5, exit
+	slt $t4, $t1,$t6
+	bne $t4,$zero,mayor	
+mayor:
+	add $t0,$t5,$zero
+	add $t1, $t6, $zero
+	add $v0, $t2, $zero
+	j exit
+exit:   
+	addi $t7, $zero, 16
+	addi $a1,$a1, 32
+	addi $t3, $a1, 28
+	bne $t2, $t7, forprimermayor
+	
+	sw $v0, 0($a0)	
+	addi $a0, $a0, 4
+	addi $t2, $zero, 0 #numerpo iteraciones
+	addi $t5, $zero, -100 
+	addi $t6, $zero, 0
+	add $t2, $zero, $zero
+	add $v0, $v0, $zero
+	add $a2, $zero, $zero
+	
+forgrande:	
+	la $a1, numbers
+	addi $t3, $a1, 28
+forarr:	
+	lw $t8, 0($a1)
+	lw $t9, 0($t3)
+	slt $t4, $t5, $t8
+	bne $t4, $zero, check
+	slt $t4, $t6, $t9
+	bne $t4, $zero, check
+	j exit
+check:
+	slt $t4, $t8, $t0
+	bne $t4, $zero, cambio
+	bne $t8, $t0, exit
+	slt $t4, $t9, $t1
+	bne $t4, $zero, cambio
+	j exit	
+cambio:
+	add $t5, $t8, $zero
+	add $t6, $t9, $zero
+	add $v0, $t2, $zero
+exit:
+	addi $t7, $zero, 16
+	beq $t2, $t7, exitgrande
+	addi $t2, $t2, 1
+	addi $a1, $a1, 32
+	addi $t3, $a1, 28
+	j forarr
+	
+exitgrande:
+	sw $v0, 0($a0)
+	addi $a0, $a0, 4
+	addi $a2, $a2, 1
+	addi $t0, $t5, 0 
+	addi $t1, $t6, 0
+	addi $t5, $zero, -100 
+	addi $t6, $zero, 0
+	addi $t7, $zero, 15
+	bne $a2, $t7, forgrande
+	jr $ra
+	
+	
+	
