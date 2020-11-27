@@ -35,11 +35,7 @@ move 	$s6, $v0	#Guarda descriptor del archivo
 
 
 jal 	leerEquipos	
-
-li 	$v0, 16
-move 	$a0, $s6
-syscall 
-
+#jal	Sort
 
 
 
@@ -212,7 +208,7 @@ mayor:
 	add 	$t1, $t6, $zero
 	add 	$v0, $t2, $zero
 	j 	exit
-exit1:   
+exit:   
 	addi 	$t7, $zero, 16
 	addi 	$a1,$a1, 32
 	addi 	$t3, $a1, 28
@@ -249,7 +245,7 @@ cambio:
 	add 	$t5, $t8, $zero
 	add 	$t6, $t9, $zero
 	add 	$v0, $t2, $zero
-exit2:
+exit:
 	addi 	$t7, $zero, 16
 	beq 	$t2, $t7, exitgrande
 	addi 	$t2, $t2, 1
