@@ -126,9 +126,6 @@ forchar:
     	j 	forchar
     	
 finishchar:
-	la 	$a0, nombreEquipo
-	li 	$v0, 4
-	syscall
 	addi 	$t3, $t3, 16	#suma ofset chars
 Runagain:   	
 	la 	$a3, numbers	#cargardireccion numbers
