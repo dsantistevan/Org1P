@@ -110,6 +110,7 @@ leerEquipos:
 	syscall
 	
 fornombre:	
+	li	$s3, 1
 	la 	$a3,nombreEquipo	#carga direccion nombreEquipo
 	add 	$a3, $a3, $t3	#suma ofset
 forchar:
@@ -140,15 +141,24 @@ for:
 	lb 	$t9,0($a1)
 	#sentencias, com y salto de linea
 	beq 	$t9, $t0, exit 
+	beq	$t9, 13, for
+	beq	$t9, 45, menos
+	j seguirAqui
+	
+menos:
+	li	$s3, -1
+	j 	for
+	
+seguirAqui:	
 	beq 	$t9, $t1, finlinea 
 	# multiplicacion por 10 variable que iba acumulando el int
-	sll 	$t4, $t4, 4
-	sll 	$t5, $t4, 2
+	sll 	$t5, $t4, 3
+	sll 	$t4, $t4, 1
 	add 	$t4, $t5, $t4
 	#obtencion unidad
 	addi 	$t9, $t9, -48   
 	#suma unidad a variable
-	add 	$t4, $t9, $v0                       
+	add 	$t4, $t9, $t4                       
     	j 	for        
 exit:
 	#escritura int construido
@@ -158,6 +168,8 @@ exit:
 	j 	Runagain
 finlinea:
 	#escritura int construido
+	mult	$t4, $s3
+	mflo	$t4
 	sw 	$t4,0($a3)
 	#suma de ofset en la variable que los va almacenando
 	addi 	$t2, $t2, 4
