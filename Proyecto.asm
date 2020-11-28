@@ -8,7 +8,7 @@ nombreEquipo: 	.space 256
 header: 	.space 36
 buffer: 	.space 1
 input:		.space 16
-archivo: 	.asciiz "TablaNueva.txt"	#Cambiar por TablaNueva.txt después de correrlo 1 vez
+archivo: 	.asciiz "TablaIni.txt"	#Cambiar por TablaNueva.txt después de correrlo 1 vez
 archivo1: 	.asciiz "TablaNueva.txt"
 #linea: .space 40
 puntoEspacio:	.asciiz ". "
@@ -51,9 +51,17 @@ menu:
 	li 	$v0, 4
 	la	$a0, menuTexto
 	syscall
-	li 	$v0, 5
+	
+#Inicio validacion
+	li 	$v0, 8
+	la	$a0, input
+	li	$a1, 16
 	syscall
-	move 	$t0, $v0
+	lb 	$t0, 0($a0)
+	addi	$t0, $t0, -48
+	sb	$zero, 0($a0)
+#Final validacion
+
 	beq 	$t0, 1, tabla
 	beq 	$t0, 2, mejores
 	beq 	$t0, 3, partido
@@ -485,30 +493,47 @@ ingresarPartido:
  	la	$a0, ingLocal
 	li	$v0, 4
 	syscall
-	li 	$v0, 5
+	li 	$v0, 8
+	la	$a0, input
+	li	$a1, 16
 	syscall
-	move 	$t0, $v0	#$t0, equipo Local
+	#Dylan	$t0 el valor numerico de lo que haya en input
+	
+	#move 	$t0, $v0	#$t0, equipo Local
+	
 	
 	la	$a0, ingVis
 	li	$v0, 4
 	syscall
-	li 	$v0, 5
+	li 	$v0, 8
+	la	$a0, input
+	li	$a1, 16
 	syscall
-	move 	$t1, $v0	#t1, equipo visitante
+	#Dylan	$t1 el valor numerico de lo que haya en input
+	
+	#move 	$t1, $v0	#t1, equipo visitante
 	
 	la	$a0, ingGLocal
 	li	$v0, 4
 	syscall
-	li 	$v0, 5
+	li 	$v0, 8
+	la	$a0, input
+	li	$a1, 16
 	syscall
-	move 	$t2, $v0	#t2, goles local
+	#Dylan	$t2 el valor numerico de lo que haya en input
+	
+	#move 	$t2, $v0	#t2, goles local
 	
 	la	$a0, ingGVis
 	li	$v0, 4
 	syscall
-	li 	$v0, 5
+	li 	$v0, 8
+	la	$a0, input
+	li	$a1, 16
 	syscall
-	move 	$t3, $v0	#t3, goles visitante
+	#Dylan	$t3 el valor numerico de lo que haya en input
+	
+	#move 	$t3, $v0	#t3, goles visitante
 	
 	la	$s2, numbers
 	sll	$t0, $t0, 5
@@ -588,6 +613,8 @@ visitante:
 	lw	$t5, 0($t1)
 	addi	$t5, $t5, 3
 	sw	$t5, 0($t1)
+	j	finalIngreso
+	
 	
 finalIngreso:
  	lw	$ra, ($sp)           
