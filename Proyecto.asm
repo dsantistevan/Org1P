@@ -1,7 +1,7 @@
 # 
 
 .data
-stringtext:	.space 600
+stringtext:	.space 800
 numbers: 	.space 512
 posiciones: 	.space 64
 nombreEquipo: 	.space 256
@@ -360,7 +360,7 @@ Write:
     	li $v0,15		# Codigo syscall para escribir un archivo
     	move $a0,$s1		# descriptor del archivo
     	la $a1,stringtext	# El string que se va a escribir
-    	la $a2,21		# longitud del string
+    	la $a2,800		# longitud del string
     	syscall
     	
 	#Cerrar archivo
