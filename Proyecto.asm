@@ -15,7 +15,7 @@ puntoEspacio:	.asciiz ". "
 espacioT:	.asciiz " "
 coma: 		.ascii ","
 saltoLinea:	.asciiz "\n"
-losSiguientes:	.asciiz "Ha elegido 'Ingresar Partido', toda opcion no válida será tomada como un 0 (Si ingresa texto en goles se tomará como 0 goles)\nLos equipos son los siguientes\n"
+losSiguientes:	.asciiz "Ha elegido 'Ingresar Partido', toda opcion no válida será tomada como un 0 (Si ingresa texto en goles se tomará como 0 goles)\nSi inicia con un número tomará los primeros dígitos hasta encontrar un caracter no válido como el número.\nLos equipos son los siguientes\n"
 ingLocal: 	.asciiz "Seleccione el equipo local ingresando su número: "
 nombreArchivo: 	.asciiz "TablaIni"
 ingVis: 	.asciiz "Seleccione el equipo visitante ingresando su número: "
@@ -25,6 +25,7 @@ mismosEquiposTexto: .asciiz "No puede ingresar el mismo equipo\n"
 bienvenidaTexto: .asciiz "\nBienvenido al visor de la tabla del Campeonato Ecuatoriano:\n"
 menuTexto: 	.asciiz "\nSeleccione su opcion:\n1. Ver tabla\n2. Ver 3 mejores\n3. Ingresar partido\n4. Salir\n"
 adios: 		.asciiz "\nAdios, gracias por usar este programa, cuídate\n"
+IngresoEquipoValidoTexto: .asciiz "Debe ingresar un equipo válido con números entre 0 y 15"
 #Salto de linea: '\n' es 10 en ASCII
 .text
 
@@ -494,6 +495,10 @@ ingresarPartido:
 	jal	ingresoValidado
 	move 	$s0, $a0	#$t0, equipo Local, despues se hace efectivo
 	
+	slti 	$t1, $s0, 0  # t1 = (x < 0) ? 1 : 0
+    	bnez  	$t1, IngresoEquipoValido
+    	sltiu 	$t1, $s0, 16  # t1 = (x < 16) ? 1 : 0
+    	beqz  	$t1, IngresoEquipoValido
 	
 	la	$a0, ingVis
 	li	$v0, 4
@@ -502,6 +507,13 @@ ingresarPartido:
 	move 	$s1, $a0	#t1, equipo visitante, despues se hace efectivo
 	
 	beq	$s1, $s0, mismosEquipos	#Mismos equipos no es válido
+	
+	slti 	$t1, $s1, 0  # t1 = (x < 0) ? 1 : 0
+    	bnez  	$t1, IngresoEquipoValido
+    	sltiu 	$t1, $s1, 16  # t1 = (x < 16) ? 1 : 0
+    	beqz  	$t1, IngresoEquipoValido
+	
+	
 	
 	la	$a0, ingGLocal
 	li	$v0, 4
@@ -600,6 +612,12 @@ visitante:
 	sw	$t5, 0($t1)
 	j	finalIngreso
 	
+	
+IngresoEquipoValido:
+	li	$v0, 4
+	la	$a0, IngresoEquipoValidoTexto
+	syscall
+	j	finalIngreso
 	
 mismosEquipos:
 	li	$v0, 4
