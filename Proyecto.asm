@@ -187,26 +187,33 @@ Sort:
 	la 	$a0, posiciones
 	la 	$a1, numbers
 	addi 	$t3, $a1, 28
+	addi 	$s1, $a1, 20
 	lw 	$t0, 0($a1) 
 	lw 	$t1, 0($t3) 
+	lw 	$s2, 0($s1)
 	addi 	$a1,$a1, 32
 	addi 	$t2, $zero, 0 #numerpo iteraciones
-	addi 	$a1,$a1,4
 	addi 	$v0, $zero, 0
 	addi 	$t3, $a1, 28
+	addi 	$s1, $a1, 20
 	
 forprimermayor:	
 	addi 	$t2 $t2, 1
 	lw 	$t5, 0($a1) 
 	lw 	$t6, 0($t3) 
+	lw	$s3, 0($s1)
 	slt 	$t4, $t0, $t5
 	bne 	$t4,$zero,mayor
 	bne 	$t0, $t5, exit1
 	slt 	$t4, $t1,$t6
-	bne 	$t4,$zero,mayor	
+	bne 	$t4,$zero,mayor
+	bne 	$t1, $t6, exit1	
+	slt	$t4, $s2,$s3
+	bne 	$t4,$zero,mayor
 mayor:
 	add 	$t0,$t5,$zero
 	add 	$t1, $t6, $zero
+	add	$s2, $s3, $zero
 	add 	$v0, $t2, $zero
 	j 	exit1
 exit1:   
@@ -220,31 +227,47 @@ exit1:
 	addi 	$t2, $zero, 0 #numerpo iteraciones
 	addi 	$t5, $zero, -100 
 	addi 	$t6, $zero, 0
-	add 	$t2, $zero, $zero
-	add 	$v0, $v0, $zero
+	addi	$s0, $zero, 0
+	addi 	$v0, $zero, 0
 	add 	$a2, $zero, $zero
 	
 forgrande:	
 	la 	$a1, numbers
 	addi	$t3, $a1, 28
+	addi	$s1, $a1, 20
+	add 	$t2, $zero, $zero
 forarr:	
 	lw 	$t8, 0($a1)
 	lw 	$t9, 0($t3)
+	lw	$s3, 0($s1)
 	slt 	$t4, $t5, $t8
 	bne 	$t4, $zero, check
+	slt 	$t4, $t8, $t5
+	bne 	$t4, $zero, exit	
 	slt 	$t4, $t6, $t9
 	bne 	$t4, $zero, check
+	slt 	$t4, $t9, $t6
+	bne 	$t4, $zero, exit
+	slt	$t4, $s0, $s3
+	bne 	$t4, $zero, check
 	j 	exit
-check:
+
+check:	
+	slt 	$t4, $t0, $t8
+	bne 	$t4, $zero, exit
 	slt 	$t4, $t8, $t0
 	bne 	$t4, $zero, cambio
-	bne 	$t8, $t0, exit
 	slt 	$t4, $t9, $t1
+	bne 	$t4, $zero, cambio
+	slt 	$t4, $t1, $t9
+	bne 	$t4, $zero, exit
+	slt	$t4, $s3, $s2
 	bne 	$t4, $zero, cambio
 	j 	exit	
 cambio:
 	add 	$t5, $t8, $zero
 	add 	$t6, $t9, $zero
+	add	$s0, $s3, $zero
 	add 	$v0, $t2, $zero
 exit:
 	addi 	$t7, $zero, 16
@@ -252,6 +275,7 @@ exit:
 	addi 	$t2, $t2, 1
 	addi 	$a1, $a1, 32
 	addi 	$t3, $a1, 28
+	addi 	$s1, $a1, 20
 	j 	forarr
 	
 exitgrande:
@@ -260,8 +284,10 @@ exitgrande:
 	addi 	$a2, $a2, 1
 	addi 	$t0, $t5, 0 
 	addi 	$t1, $t6, 0
+	addi	$s2, $s0, 0
 	addi 	$t5, $zero, -100 
 	addi 	$t6, $zero, 0
+	addi	$s0, $zero, 0
 	addi 	$t7, $zero, 15
 	bne 	$a2, $t7, forgrande
 	jr 	$ra
@@ -311,4 +337,25 @@ forEquipo:
 	bne	$t4, $t0, recorrerPos
 #Afuera de todo
 	jr	$ra
+Write:
+	li $v0,13           	# open_file syscall code = 13
+    	la $a0,archivo     	# get the file name
+    	li $a1, 1          	# file flag = write (1)
+    	syscall
+    	move $s1,$v0        	# save the file descriptor. $s0 = file
+    	
+    	#Write the file
+    	li $v0,15		# write_file syscall code = 15
+    	move $a0,$s1		# file descriptor
+    	la $a1,ingLoc		# the string that will be written
+    	la $a2,21		# length of the toWrite string
+    	syscall
+    	
+	#MUST CLOSE FILE IN ORDER TO UPDATE THE FILE
+    	li $v0,16         		# close_file syscall code
+    	move $a0,$s1      		# file descriptor to close
+    	syscall
+	jr $ra
+	
+toString:
 	
