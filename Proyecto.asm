@@ -1,6 +1,7 @@
 # 
 
 .data
+stringtext:	.space 600
 numbers: 	.space 512
 posiciones: 	.space 64
 nombreEquipo: 	.space 256
@@ -8,6 +9,7 @@ header: 	.space 36
 buffer: 	.space 1
 input:		.space 16
 archivo: 	.asciiz "TablaIni.txt"
+archivo1: 	.asciiz "eje.txt"
 #linea: .space 40
 puntoEspacio:	.asciiz ". "
 espacioT:	.asciiz " "
@@ -41,6 +43,8 @@ move 	$s6, $v0	#Guarda descriptor del archivo
 jal 	leerEquipos	
 jal	Sort
 jal	printEquipos
+jal toString
+jal 	Write
 
 
 
@@ -344,8 +348,10 @@ forEquipo:
 	
 
 Write:
+	
+	
 	li $v0,13           	# Codigo syscall para abrir archivo
-    	la $a0,archivo     	# nombre del archivo
+    	la $a0,archivo1     	# nombre del archivo
     	li $a1, 1          	# bandera = escribir (1)
     	syscall
     	move $s1,$v0        	# guarda el descriptor del archivo
@@ -353,7 +359,7 @@ Write:
     	#Escritura
     	li $v0,15		# Codigo syscall para escribir un archivo
     	move $a0,$s1		# descriptor del archivo
-    	la $a1,ingLoc		# El string que se va a escribir
+    	la $a1,stringtext	# El string que se va a escribir
     	la $a2,21		# longitud del string
     	syscall
     	
@@ -361,11 +367,13 @@ Write:
     	li $v0,16         	# Codigo syscall para abrir archivo
     	move $a0,$s1      	# descriptor del archivo a cerrar
     	syscall
+    	
+    	
+    	
 	jr $ra
 	
 	
 	
-toString:
 	
 
 #printEquipos()
@@ -391,3 +399,77 @@ recorrerEquiposPrint:
 	bne	$t1, $t2, recorrerEquiposPrint
 	jr	$ra
 	
+	
+toString:
+	la $a0, stringtext
+	la $a1, header
+	addi $t0, $zero, 0
+	addi $t1, $zero, 36
+	
+forcabec:
+	lb $v0,0($a1)
+	sb $v0,0($a0) 
+	addi $a0, $a0, 1
+	addi $a1, $a1, 1
+	addi $t0, $t0, 1
+	bne $t1, $t0, forcabec
+
+	la $a1, nombreEquipo
+	la $a2, numbers
+	addi $t0, $zero, 16
+	addi $t2, $zero, 45 #-
+	addi $t3, $zero, 10 #\n
+	addi $t4, $zero, 44 #,
+	addi $t6, $zero, 8
+	addi $t7, $zero, 0 #lineas	
+	addi $s7, $zero, 10
+
+forlinea:
+	addi $t1, $zero, 0
+fortexto:
+	lb $v0,0($a1)
+	sb $v0,0($a0) 
+	addi $a0, $a0, 1
+	addi $a1, $a1, 1
+	addi $t1, $t1, 1
+	bne $t1, $t0, fortexto
+
+	addi $t5, $zero, 0	
+intero:
+	#lb $v0,0($t4)
+	sb $t4,0($a0) 
+	addi $a0, $a0, 1
+	
+	lw $t9, 0($a2)
+	addi $a2,$a2,4
+	
+	slt $s0, $t9, $zero
+	beq $s0, $zero, jumper
+	#lb $v0,0($t2)
+	sb $t2,0($a0) 
+	addi $a0, $a0, 1
+	#multiplying -1
+	add $s1, $t9, $zero
+	sll $s1, $s1, 2
+	sub $t9, $t9, $s1
+jumper:
+	div $t9, $s7
+	mflo $s1
+	mfhi $s2
+	addi $s1, $s1, 48
+	addi $s2, $s2, 48
+	sb $s1,0($a0) 
+	addi $a0, $a0, 1
+	sb $s2,0($a0) 
+	addi $a0, $a0, 1
+		
+
+	addi $t5, $t5, 1
+	bne $t5, $t6, intero
+	#lb $v0,0($t3)
+	sb $t3,0($a0) 
+	addi $a0, $a0, 1
+	addi $t7, $t7, 1
+	bne $t7, $t0, forlinea
+	jr $ra
+		
