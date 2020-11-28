@@ -449,9 +449,9 @@ intero:
 	sb $t2,0($a0) 
 	addi $a0, $a0, 1
 	#multiplying -1
-	add $s1, $t9, $zero
-	sll $s1, $s1, 2
-	sub $t9, $t9, $s1
+	li $s1, -1
+	mult $t9, $s1
+	mflo $t9
 jumper:
 	div $t9, $s7
 	mflo $s1
