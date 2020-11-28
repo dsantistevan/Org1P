@@ -21,6 +21,7 @@ nombreArchivo: 	.asciiz "TablaIni"
 ingVis: 	.asciiz "Seleccione el equipo visitante ingresando su número: "
 ingGLocal: 	.asciiz "Ingrese los goles del equipo local: "
 ingGVis: 	.asciiz "Ingrese los goles del equipo visitante: "
+mismosEquiposTexto: .asciiz "No puede ingresar el mismo equipo\n"
 bienvenidaTexto: .asciiz "\nBienvenido al visor de la tabla del Campeonato Ecuatoriano:\n"
 menuTexto: 	.asciiz "\nSeleccione su opcion:\n1. Ver tabla\n2. Ver 3 mejores\n3. Ingresar partido\n4. Salir\n"
 adios: 		.asciiz "\nAdios, gracias por usar este programa, cuídate\n"
@@ -500,6 +501,8 @@ ingresarPartido:
 	jal	ingresoValidado
 	move 	$s1, $a0	#t1, equipo visitante, despues se hace efectivo
 	
+	beq	$s1, $s0, mismosEquipos	#Mismos equipos no es válido
+	
 	la	$a0, ingGLocal
 	li	$v0, 4
 	syscall
@@ -598,11 +601,19 @@ visitante:
 	j	finalIngreso
 	
 	
+mismosEquipos:
+	li	$v0, 4
+	la	$a0, mismosEquiposTexto
+	syscall
+		
 finalIngreso:
  	lw	$ra, ($sp)           
    	addi	$sp, $sp, 4           
    	jr      $ra 
    	
+
+   	
+   	   	
    	
 ingresoValidado:
 	li 	$v0, 8
@@ -626,6 +637,6 @@ forVali:
     	add	$a0, $a0, $t1
     	addi	$a2, $a2, 1
     	j	forVali
-    	
+
 chaoFor:
 	jr	$ra
