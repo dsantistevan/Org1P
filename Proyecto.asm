@@ -9,6 +9,7 @@ buffer: 	.space 1
 input:		.space 16
 archivo: 	.asciiz "TablaIni.txt"
 #linea: .space 40
+puntoEspacio:	.asciiz ". "
 espacioT:	.asciiz " "
 coma: 		.ascii ","
 saltoLinea:	.asciiz "\n"
@@ -39,6 +40,7 @@ move 	$s6, $v0	#Guarda descriptor del archivo
 
 jal 	leerEquipos	
 jal	Sort
+jal	printEquipos
 
 
 
@@ -337,6 +339,9 @@ forEquipo:
 	bne	$t4, $t0, recorrerPos
 #Afuera de todo
 	jr	$ra
+	
+	
+
 Write:
 	li $v0,13           	# open_file syscall code = 13
     	la $a0,archivo     	# get the file name
@@ -357,5 +362,31 @@ Write:
     	syscall
 	jr $ra
 	
+	
+	
 toString:
+	
+
+#printEquipos()
+printEquipos:
+	la	$t0, nombreEquipo
+	li	$t1, 16
+	li	$t2, 0
+recorrerEquiposPrint:
+	addi	$a0, $t2, 0
+	li	$v0, 1
+	syscall
+	la	$a0, puntoEspacio
+	li	$v0, 4
+	syscall
+	sll	$t3, $t2, 4
+	add	$a0, $t3, $t0
+	li	$v0, 4
+	syscall
+	la	$a0, saltoLinea
+	li	$v0, 4
+	syscall
+	addi	$t2, $t2, 1
+	bne	$t1, $t2, recorrerEquiposPrint
+	jr	$ra
 	
