@@ -15,7 +15,7 @@ puntoEspacio:	.asciiz ". "
 espacioT:	.asciiz " "
 coma: 		.ascii ","
 saltoLinea:	.asciiz "\n"
-losSiguientes:	.asciiz "Los equipos son los siguientes\n"
+losSiguientes:	.asciiz "Ha elegido 'Ingresar Partido', toda opcion no válida será tomada como un 0 (Si ingresa texto en goles se tomará como 0 goles)\nLos equipos son los siguientes\n"
 ingLocal: 	.asciiz "Seleccione el equipo local ingresando su número: "
 nombreArchivo: 	.asciiz "TablaIni"
 ingVis: 	.asciiz "Seleccione el equipo visitante ingresando su número: "
@@ -115,10 +115,7 @@ leerEquipos:
 	la 	$a1, header #lectura header
 	la 	$a2,36
 	syscall
-	
-	li 	$v0, 4
-	la 	$a0, header
-	syscall
+
 	
 fornombre:	
 	li	$s3, 1
@@ -493,47 +490,32 @@ ingresarPartido:
  	la	$a0, ingLocal
 	li	$v0, 4
 	syscall
-	li 	$v0, 8
-	la	$a0, input
-	li	$a1, 16
-	syscall
-	#Dylan	$t0 el valor numerico de lo que haya en input
-	
-	#move 	$t0, $v0	#$t0, equipo Local
+	jal	ingresoValidado
+	move 	$s0, $a0	#$t0, equipo Local, despues se hace efectivo
 	
 	
 	la	$a0, ingVis
 	li	$v0, 4
 	syscall
-	li 	$v0, 8
-	la	$a0, input
-	li	$a1, 16
-	syscall
-	#Dylan	$t1 el valor numerico de lo que haya en input
-	
-	#move 	$t1, $v0	#t1, equipo visitante
+	jal	ingresoValidado
+	move 	$s1, $a0	#t1, equipo visitante, despues se hace efectivo
 	
 	la	$a0, ingGLocal
 	li	$v0, 4
 	syscall
-	li 	$v0, 8
-	la	$a0, input
-	li	$a1, 16
-	syscall
-	#Dylan	$t2 el valor numerico de lo que haya en input
-	
-	#move 	$t2, $v0	#t2, goles local
+	jal	ingresoValidado
+	move 	$s2, $a0	#t2, goles local
 	
 	la	$a0, ingGVis
 	li	$v0, 4
 	syscall
-	li 	$v0, 8
-	la	$a0, input
-	li	$a1, 16
-	syscall
-	#Dylan	$t3 el valor numerico de lo que haya en input
+	jal	ingresoValidado
+	move 	$t3, $a0	#t3, goles visitante
 	
-	#move 	$t3, $v0	#t3, goles visitante
+	
+	move	$t0, $s0
+	move	$t1, $s1
+	move	$t2, $s2
 	
 	la	$s2, numbers
 	sll	$t0, $t0, 5
@@ -620,3 +602,30 @@ finalIngreso:
  	lw	$ra, ($sp)           
    	addi	$sp, $sp, 4           
    	jr      $ra 
+   	
+   	
+ingresoValidado:
+	li 	$v0, 8
+	la	$a0, input
+	li	$a1, 16
+	syscall
+	li	$a0, 0
+	la	$a1, input
+	li	$a2, 0
+forVali:
+	add	$a3, $a2, $a1
+	lb	$t0, 0($a3)     
+    	sltiu 	$t1, $t0, 48  # t1 = (x < 48) ? 1 : 0
+    	bnez  	$t1, chaoFor
+    	sltiu 	$t1, $t0, 58  # t1 = (x < 58) ? 1 : 0
+    	beqz  	$t1, chaoFor
+    	li	$t2, 10
+    	mult	$a0, $t2
+    	mflo	$a0
+    	addi	$t1, $t0, -48
+    	add	$a0, $a0, $t1
+    	addi	$a2, $a2, 1
+    	j	forVali
+    	
+chaoFor:
+	jr	$ra
