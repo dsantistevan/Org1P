@@ -8,17 +8,18 @@ nombreEquipo: 	.space 256
 header: 	.space 36
 buffer: 	.space 1
 input:		.space 16
-archivo: 	.asciiz "TablaIni.txt"
-archivo1: 	.asciiz "eje.txt"
+archivo: 	.asciiz "TablaNueva.txt"	#Cambiar por TablaNueva.txt después de correrlo 1 vez
+archivo1: 	.asciiz "TablaNueva.txt"
 #linea: .space 40
 puntoEspacio:	.asciiz ". "
 espacioT:	.asciiz " "
 coma: 		.ascii ","
 saltoLinea:	.asciiz "\n"
-ingLoc: 	.asciiz "Ingrese el equipo local: "
+losSiguientes:	.asciiz "Los equipos son los siguientes\n"
+ingLocal: 	.asciiz "Seleccione el equipo local ingresando su número: "
 nombreArchivo: 	.asciiz "TablaIni"
-ingVis: 	.asciiz "Ingrese el equipo visitante: "
-ingGLoc: 	.asciiz "Ingrese los goles del equipo local: "
+ingVis: 	.asciiz "Seleccione el equipo visitante ingresando su número: "
+ingGLocal: 	.asciiz "Ingrese los goles del equipo local: "
 ingGVis: 	.asciiz "Ingrese los goles del equipo visitante: "
 bienvenidaTexto: .asciiz "\nBienvenido al visor de la tabla del Campeonato Ecuatoriano:\n"
 menuTexto: 	.asciiz "\nSeleccione su opcion:\n1. Ver tabla\n2. Ver 3 mejores\n3. Ingresar partido\n4. Salir\n"
@@ -42,9 +43,7 @@ move 	$s6, $v0	#Guarda descriptor del archivo
 
 jal 	leerEquipos	
 jal	Sort
-jal	printEquipos
-jal toString
-jal 	Write
+
 
 
 
@@ -73,9 +72,8 @@ menu:
 	
 	
 	partido:
-		li 	$v0, 4
-		la 	$a0, ingGLoc
-		syscall
+		jal 	ingresarPartido
+		jal	Sort
 		j 	menu
 
 #####################Funciones######################
@@ -84,7 +82,8 @@ salir:
 	li 	$v0, 4
 	la 	$a0, adios
 	syscall
-	#jal	Write
+	jal 	toString
+	jal 	Write
 	li 	$v0, 10
 	syscall
 
@@ -473,3 +472,124 @@ jumper:
 	bne $t7, $t0, forlinea
 	jr $ra
 		
+		
+		
+ingresarPartido:
+	la	$a0, losSiguientes
+	li	$v0, 4
+	syscall
+	addiu	$sp, $sp, -4
+ 	sw	$ra, 0($sp)
+ 	jal	printEquipos
+ 	
+ 	la	$a0, ingLocal
+	li	$v0, 4
+	syscall
+	li 	$v0, 5
+	syscall
+	move 	$t0, $v0	#$t0, equipo Local
+	
+	la	$a0, ingVis
+	li	$v0, 4
+	syscall
+	li 	$v0, 5
+	syscall
+	move 	$t1, $v0	#t1, equipo visitante
+	
+	la	$a0, ingGLocal
+	li	$v0, 4
+	syscall
+	li 	$v0, 5
+	syscall
+	move 	$t2, $v0	#t2, goles local
+	
+	la	$a0, ingGVis
+	li	$v0, 4
+	syscall
+	li 	$v0, 5
+	syscall
+	move 	$t3, $v0	#t3, goles visitante
+	
+	la	$s2, numbers
+	sll	$t0, $t0, 5
+	add	$t0, $s2, $t0
+	sll	$t1, $t1, 5
+	add	$t1, $t1, $s2
+#goles
+	lw	$t4, 20($t0)
+	lw	$t5, 20($t1)
+	add	$t4, $t4, $t2
+	add	$t5, $t5, $t3
+	sw	$t4, 20($t0)
+	sw	$t5, 20($t1)
+	
+	lw	$t4, 24($t0)
+	lw	$t5, 24($t1)
+	add	$t4, $t4, $t3
+	add	$t5, $t5, $t2
+	sw	$t4, 24($t0)
+	sw	$t5, 24($t1)
+	
+	lw	$t8, 20($t0)
+	lw	$t9, 20($t1)
+	sub	$t8, $t8, $t4
+	sub	$t9, $t9, $t5
+	sw	$t8, 28($t0)
+	sw	$t9, 28($t1)
+	
+#partido
+	lw	$t4, 4($t0)
+	lw	$t5, 4($t1)
+	addi	$t4, $t4, 1
+	addi	$t5, $t5, 1
+	sw	$t4, 4($t0)
+	sw	$t5, 4($t1)
+
+	beq	$t2, $t3, empate
+	slt	$t6, $t2, $t3	#Ganó el visitante
+	beq	$t6, 1, visitante
+#Ganó el local
+	lw	$t4, 8($t0)
+	lw	$t5, 16($t1)
+	addi	$t4, $t4, 1
+	addi	$t5, $t5, 1
+	sw	$t4, 8($t0)
+	sw	$t5, 16($t1)
+	#puntos
+	lw	$t4, 0($t0)
+	addi	$t4, $t4, 3
+	sw	$t4, 0($t0)
+	j	finalIngreso
+
+empate:
+	lw	$t4, 12($t0)
+	lw	$t5, 12($t1)
+	addi	$t4, $t4, 1
+	addi	$t5, $t5, 1
+	sw	$t4, 12($t0)
+	sw	$t5, 12($t1)
+	#puntos
+	lw	$t4, 0($t0)
+	lw	$t5, 0($t1)
+	addi	$t4, $t4, 1
+	addi	$t5, $t5, 1
+	sw	$t4, 0($t0)
+	sw	$t5, 0($t1)
+	j	finalIngreso
+
+visitante:
+	lw	$t4, 16($t0)
+	lw	$t5, 8($t1)
+	addi	$t4, $t4, 1
+	addi	$t5, $t5, 1
+	sw	$t4, 16($t0)
+	sw	$t5, 8($t1)
+	#puntos
+	lw	$t5, 0($t1)
+	addi	$t5, $t5, 3
+	sw	$t5, 0($t1)
+	
+finalIngreso:
+ 	lw	$ra, ($sp)           
+   	addi	$sp, $sp, 4           
+   	jr      $ra 
